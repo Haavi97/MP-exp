@@ -76,7 +76,7 @@ def run(model: str, num_hands: int,
         if COUNTER % fps_avg_frame_count == 0:
             FPS = fps_avg_frame_count / (time.time() - START_TIME)
             START_TIME = time.time()
-
+        # if not recognition_result_list:
         recognition_result_list.append(result)
         COUNTER += 1
 
@@ -105,17 +105,16 @@ def run(model: str, num_hands: int,
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
 
-        # Run gesture recognizer using the model.
-        recognizer.recognize_async(mp_image, time.time_ns() // 1_000_000)
-
         # Show the FPS
         fps_text = 'FPS = {:.1f}'.format(FPS)
         text_location = (left_margin, row_size)
         current_frame = image
         cv2.putText(current_frame, fps_text, text_location, cv2.FONT_HERSHEY_DUPLEX,
                     font_size, text_color, font_thickness, cv2.LINE_AA)
-
-        if recognition_result_list:
+        # Run gesture recognizer using the model.
+        if not recognition_result_list:
+            recognizer.recognize_async(mp_image, time.time_ns() // 1_000_000)
+        else:
             # Draw landmarks and write the text for each hand.
             for hand_index, hand_landmarks in enumerate(
                     recognition_result_list[0].hand_landmarks):
